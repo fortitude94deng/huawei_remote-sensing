@@ -113,8 +113,8 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         set_parameter_requires_grad(net, feature_extract)
         num_ftrs = net.classifier.in_features
         net.classifier = nn.Linear(num_ftrs, num_classes)
-        pre='/home/dell/Desktop/zhou/train3/net_024.pth'
-        net.load_state_dict(torch.load(pre)) 
+        #pre='/home/dell/Desktop/zhou/train3/net_024.pth'
+        #net.load_state_dict(torch.load(pre)) 
         input_size = 224
 
     elif model_name == "inception":
@@ -145,13 +145,13 @@ net, input_size = initialize_model(model_name, num_classes, feature_extract, use
 
 # Detect if we have a GPU available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-'''
+
 #训练使用多GPU，测试单GPU
 if torch.cuda.device_count() > 1:
   print("Let's use", torch.cuda.device_count(), "GPUs!")
   # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
   net = nn.DataParallel(net)
-'''
+
 net.to(device)
 # Send the model to GPU
 net = net.to(device)
@@ -309,8 +309,8 @@ def main():
                         best_acc = acc
             print("Training Finished, TotalEPOCH=%d" % EPOCH)
 if __name__ == "__main__":
-#    main()
-    test(test_loader,net)
+    main()
+#    test(test_loader,net)
 
 '''
 
