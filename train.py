@@ -179,7 +179,7 @@ net.class_to_idx = image_datasets['train'].class_to_idx
 net.idx_to_class = {
     idx: class_
     for class_, idx in net.class_to_idx.items()}
-
+c={0: 26, 1: 30, 2: 13, 3: 31, 4: 40, 5: 6, 6: 16, 7: 11, 8: 23, 9: 41, 10: 24, 11: 9, 12: 15, 13: 1, 14: 28, 15: 5, 16: 29, 17: 3, 18: 17, 19: 2, 20: 39, 21: 25, 22: 7, 23: 8, 24: 44, 25: 21, 26: 35, 27: 14, 28: 45, 29: 37, 30: 27, 31: 42, 32: 10, 33: 43, 34: 34, 35: 18, 36: 22, 37: 4, 38: 38, 39: 20, 40: 32, 41: 33, 42: 36, 43: 12, 44: 19}
 #print(list(net.idx_to_class.items()))
 test_files = pd.read_csv("/home/dell/Desktop/1.csv")
 test_gen = create_test(test_files,'/media/dell/dell/data/遥感/test/',augument=False,mode="test")
@@ -226,9 +226,10 @@ def test(test_loader,model):
 
     for row in np.concatenate(labels):
         subrow=np.argmax(row)
+        subrow=c[subrow]
         submissions.append(subrow)
     sample_submission_df['Predicted'] = submissions
-    sample_submission_df.to_csv('/home/dell/Desktop/densenet_bestloss_submission.csv', index=None)
+    sample_submission_df.to_csv('/home/dell/Desktop/densent.csv', index=None)
 
 
 def main():
