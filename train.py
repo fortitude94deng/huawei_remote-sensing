@@ -37,7 +37,7 @@ num_classes = 45
 batch_size = 128     #批处理尺寸(batch_size)
 
 # Number of epochs to train for 
-EPOCH = 1000
+EPOCH = 100
 
 # Flag for feature extracting. When False, we finetune the whole model, 
 #   when True we only update the reshaped layer params
@@ -146,6 +146,7 @@ net, input_size = initialize_model(model_name, num_classes, feature_extract, use
 # Detect if we have a GPU available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 '''
+#训练使用多GPU，测试单GPU
 if torch.cuda.device_count() > 1:
   print("Let's use", torch.cuda.device_count(), "GPUs!")
   # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
