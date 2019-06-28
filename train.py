@@ -5,7 +5,6 @@
 from torch.utils import data
 import os
 from PIL import  Image
-from torchvision import transforms as T
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from torchvision.utils import make_grid, save_image
@@ -21,7 +20,6 @@ import torch.optim as optim
 import argparse
 import warnings
 import torch.optim.lr_scheduler as lr_scheduler
-from torchvision import models
 from tqdm import tqdm 
 warnings.filterwarnings("ignore")
 
@@ -45,8 +43,6 @@ EPOCH = 100
 feature_extract =False
 # 超参数设置
 pre_epoch = 0  # 定义已经遍历数据集的次数
-
-
 
 from torch.utils.data.dataloader import default_collate # 导入默认的拼接方式
 def my_collate_fn(batch):
@@ -113,7 +109,7 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         set_parameter_requires_grad(net, feature_extract)
         num_ftrs = net.classifier.in_features
         net.classifier = nn.Linear(num_ftrs, num_classes)
-        #pre='/home/dell/Desktop/zhou/train3/net_024.pth'
+        #pre='/home/dell/Desktop/dj/train3/net_024.pth'
         #net.load_state_dict(torch.load(pre)) 
         input_size = 224
 
@@ -172,20 +168,19 @@ data_transforms = {
 
 # Create training and validation datasets
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
-#print(len(image_datasets['train']))
 # Create training and validation dataloaders
 dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=16,collate_fn=my_collate_fn) for x in ['train', 'val']}
 b= image_datasets['train'].class_to_idx
 
 c={0: 26, 1: 30, 2: 13, 3: 31, 4: 40, 5: 6, 6: 16, 7: 11, 8: 23, 9: 41, 10: 24, 11: 9, 12: 15, 13: 1, 14: 28, 15: 5, 16: 29, 17: 3, 18: 17, 19: 2, 20: 39, 21: 25, 22: 7, 23: 8, 24: 44, 25: 21, 26: 35, 27: 14, 28: 45, 29: 37, 30: 27, 31: 42, 32: 10, 33: 43, 34: 34, 35: 18, 36: 22, 37: 4, 38: 38, 39: 20, 40: 32, 41: 33, 42: 36, 43: 12, 44: 19}
-#print(list(net.idx_to_class.items()))
+
 test_files = pd.read_csv("/home/dell/Desktop/1.csv")
 test_gen = create_test(test_files,'/media/dell/dell/data/遥感/test/',augument=False,mode="test")
 test_loader = DataLoader(test_gen,1,shuffle=False,pin_memory=True,num_workers=16)
 # 参数设置,使得我们能够手动输入命令行参数，就是让风格变得和Linux命令行差不多
 parser = argparse.ArgumentParser(description='PyTorch densenet Training')
-parser.add_argument('--outf', default='/home/dell/Desktop/zhou/train3/', help='folder to output images and model checkpoints') #输出结果保存路径
-#parser.add_argument('--net', default='/home/dell/Desktop/zhou/resnet.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
+parser.add_argument('--outf', default='/home/dell/Desktop/dj/train/', help='folder to output images and model checkpoints') #输出结果保存路径
+#parser.add_argument('--net', default='/home/dell/Desktop/dj/densenet.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
 args = parser.parse_args()
 params_to_update = net.parameters()
 
@@ -201,10 +196,8 @@ else:
         if param.requires_grad == True:
             print("\t",name)
 
-# 3. test model on public dataset and save the probability matrix
 def test(test_loader,model):
     sample_submission_df = pd.read_csv("/home/dell/Desktop/1.csv")
-    #3.1 confirm the model converted to cuda
     filenames,labels ,submissions= [],[],[]
     model.to(device)
     model.eval()
@@ -212,12 +205,9 @@ def test(test_loader,model):
     for i,(input,filepath) in tqdm(enumerate(test_loader)):
         #3.2 change everything to cuda and get only basename
         filepath = [os.path.basename(x) for x in filepath]
-        #print(filepath)
-        #print(input)
         with torch.no_grad():
             image_var = input.to(device)
             y_pred = model(image_var)
-#            y_pred = model(image_var,visit)
             label=y_pred.cpu().data.numpy()
             labels.append(label==np.max(label))
             filenames.append(filepath)
@@ -239,9 +229,8 @@ def main():
     criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
     optimizer = optim.SGD(params_to_update, lr=LR, momentum=0.9, weight_decay=5e-4) #优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
     scheduler = lr_scheduler.StepLR(optimizer,step_size=10,gamma=0.1)
-    #optimizer = optim.SGD(params_to_update, lr=LR, momentum=0.9) #优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
-    with open("/home/dell/Desktop/zhou/train3/acc.txt", "w") as f:
-        with open("/home/dell/Desktop/zhou/train3/log.txt", "w")as f2:
+    with open("/home/dell/Desktop/dj/train/acc.txt", "w") as f:
+        with open("/home/dell/Desktop/dj/train/log.txt", "w")as f2:
             for epoch in range(pre_epoch, EPOCH):
                 scheduler.step(epoch)
                 print('\nEpoch: %d' % (epoch + 1))
@@ -302,7 +291,7 @@ def main():
                     f.flush()
                     # 记录最佳测试分类准确率并写入best_acc.txt文件中
                     if acc > best_acc:
-                        f3 = open("/home/dell/Desktop/zhou/train3/best_acc.txt", "w")
+                        f3 = open("/home/dell/Desktop/dj/train/best_acc.txt", "w")
                         f3.write("EPOCH=%d,best_acc= %.3f%%" % (epoch + 1, acc))
                         f3.close()
                         best_acc = acc
