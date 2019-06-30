@@ -33,7 +33,7 @@ class create_test(Dataset):
             y = str(self.images_df.iloc[index].Id.absolute())
         if self.augument:
             X = self.augumentor(X)
-        X = T.Compose([T.ToPILImage(),T.ToTensor()])(X)
+        X = T.Compose([T.ToPILImage(),T.Resize(224),T.CenterCrop(224),T.ToTensor(),T.Normalize([0.38778037, 0.39704339, 0.35098507],[0.14292925 ,0.13582868 ,0.13065994])])(X)
         return X.float(),y
 
 
