@@ -11,7 +11,7 @@ from torchvision import transforms as T
 from imgaug import augmenters as iaa
 import random
 import pathlib
-import cv2
+from PIL import Image
 # create dataset class
 class create_test(Dataset):
     def __init__(self,images_df, base_path,augument=True,mode="train"):
@@ -33,7 +33,7 @@ class create_test(Dataset):
             y = str(self.images_df.iloc[index].Id.absolute())
         if self.augument:
             X = self.augumentor(X)
-        X = T.Compose([T.ToPILImage(),T.Resize(224),T.CenterCrop(224),T.ToTensor(),T.Normalize([0.38778037, 0.39704339, 0.35098507],[0.14292925 ,0.13582868 ,0.13065994])])(X)
+        X = T.Compose([T.Resize(224),T.CenterCrop(224),T.ToTensor(),T.Normalize([0.38778037, 0.39704339, 0.35098507],[0.14292925 ,0.13582868 ,0.13065994])])(X)
         return X.float(),y
 
 
@@ -41,7 +41,7 @@ class create_test(Dataset):
         row = self.images_df.iloc[index]
         filename = str(row.Id.absolute())
         #print(filename)
-        images = cv2.imread(filename)#+'.jpg')
+        images = Image.open(filename)#+'.jpg')
         return images
 
     def augumentor(self,image):
@@ -64,33 +64,3 @@ class create_test(Dataset):
 
         image_aug = augment_img.augment_image(image)
         return image_aug
-'''
-test_files = pd.read_csv("/home/dell/Desktop/1.csv")
-#train_gen = MultiModalDataset(train_data_list,config.train_data,config.train_vis,mode="train")
-test_gen = create_test(test_files,'/media/dell/dell/data/遥感/test/',augument=False,mode="test")
-#test_loader = DataLoader(test_gen,1,shuffle=False,pin_memory=True,num_workers=16)
-x,y=test_gen[1]
-print(x)
-print(y)
-'''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
